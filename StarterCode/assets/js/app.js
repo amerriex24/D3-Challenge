@@ -19,7 +19,7 @@ var height = svgHeight - margin.top - margin.bottom;
 // and shift the latter by left and top margins.
 // =================================
 var svg = d3
-  .select("#scatter")
+  .selected("#scatter")
   .append("svg")
   .attr("width", svgWidth)
   .attr("height", svgHeight);
@@ -29,30 +29,30 @@ var chartGroup = svg.append("g")
 
 // Setting up data
 
-var selectXAxis = "poverty";
-var selectYAxis = "healthcare";
+var selectedXAxis = "poverty";
+var selectedYAxis = "healthcare";
 
-//Function to update x-scale upon selection
-function xScale(data, selectXAxis) {
+//Function to update x-scale upon selectedion
+function xScale(data, selectedXAxis) {
     var xLinearScale = d3.scaleLinear()
-        .domain([d3.min(data, d => d[selectXAxis]) * 0.8,
-            d3.max(data, d => d[selectXAxis]) * 1.2
+        .domain([d3.min(data, d => d[selectedXAxis]) * 0.8,
+            d3.max(data, d => d[selectedXAxis]) * 1.2
         ])
         .range([0, width]);
     return xLinearScale;
 };
 
-//Function to update y-scale upon selection
-function yScale(data, selectYAxis) {
+//Function to update y-scale upon selectedion
+function yScale(data, selectedYAxis) {
     var yLinearScale = d3.scaleLinear()
-        .domain([d3.min(data, d => d[selectYAxis]) * 0.8,
-            d3.max(data, d => d[selectYAxis]) * 1.2
+        .domain([d3.min(data, d => d[selectedYAxis]) * 0.8,
+            d3.max(data, d => d[selectedYAxis]) * 1.2
         ])
         .range([height, 0]);
     return yLinearScale;
 };
 
-//Function to update othrerx-axis upon selection
+//Function to update othrerx-axis upon selectedion
 function setXAxis(newXScale, xAxis) {
     var bottomAxis = d3.axisBottom(newXScale);
 
@@ -62,7 +62,7 @@ function setXAxis(newXScale, xAxis) {
     return xAxis;
 }
 
-//Function to update othery-axis upon selection
+//Function to update othery-axis upon selectedion
 function setYAxis(newYScale, yAxis) {
     var leftAxis = d3.axisLeft(newYScale);
 
@@ -71,35 +71,35 @@ function setYAxis(newYScale, yAxis) {
         .call(leftAxis);
     return yAxis;
 }
-//Function to update circles group upon selection
-function setCircles(circlesGroup, newXScale, selectXAxis, newYScale, selectYAxis) {
+//Function to update circles group upon selectedion
+function setCircles(circlesGroup, newXScale, selectedXAxis, newYScale, selectedYAxis) {
     circlesGroup.transition()
         .duration(100)
-        .attr("cx", d => newXScale(d[selectXAxis]))
-        .attr("cy", d => newYScale(d[selectYAxis]))
+        .attr("cx", d => newXScale(d[selectedXAxis]))
+        .attr("cy", d => newYScale(d[selectedYAxis]))
     
         return circlesGroup;
 }
 
-//Function to update circle text group upon selection
-function setCircleText(circlesText, newXScale, selectXAxis, newYScale, selectYAxis) {
+//Function to update circle text group upon selectedion
+function setCircleText(circlesText, newXScale, selectedXAxis, newYScale, selectedYAxis) {
     circlesText.transition()
         .duration(1000)
-        .attr("x", d => newXScale(d[selectXAxis]))
-        .attr("y", d => newYScale(d[selectYAxis]))
+        .attr("x", d => newXScale(d[selectedXAxis]))
+        .attr("y", d => newYScale(d[selectedYAxis]))
     return circlesText;
 }
 
 //Function to update the circles with the tooltip
-function setToolTip(selectXAxis, circlesGroup, selectYAxis) {
+function setToolTip(selectedXAxis, circlesGroup, selectedYAxis) {
     let label;
     let unit;
 
-    if(selectXAxis === "poverty") {
+    if(selectedXAxis === "poverty") {
         label = "Poverty: " 
         unit = "%"
     }
-    else if(selectXAxis === "age") {
+    else if(selectedXAxis === "age") {
         label = "Age: "
         unit = " yrs"
     }
@@ -108,11 +108,11 @@ function setToolTip(selectXAxis, circlesGroup, selectYAxis) {
         unit = "$"
     }
 
-    if(selectYAxis === "healthcare") {
+    if(selectedYAxis === "healthcare") {
         yLabel = "Lack Healthcare: " 
         yUnit = "%"
     }
-    else if(selectYAxis === "smokes") {
+    else if(selectedYAxis === "smokes") {
         yLabel = "Smoke: "
         yUnit = "%"
     }
@@ -125,7 +125,7 @@ function setToolTip(selectXAxis, circlesGroup, selectYAxis) {
         .attr("class", "d3-tip")
         .offset([80, -80])
         .html(function(d) {
-            return(`<strong>${d.state}</strong><br>${label}${d[selectXAxis]}${unit}<br>${yLabel}${d.healthcare}${yUnit}`);
+            return(`<strong>${d.state}</strong><br>${label}${d[selectedXAxis]}${unit}<br>${yLabel}${d.healthcare}${yUnit}`);
         });
     
     chartGroup.call(toolTip);
@@ -140,7 +140,9 @@ function setToolTip(selectXAxis, circlesGroup, selectYAxis) {
 
 //Import Data from data.CSV
 
-    d3.csv("./assets/data/data.csv").then(function(data) {
+    d3.csv("./assets/data/data.csv").then(function(data, err) {
+        if (err) throw err;
+
 
     data.forEach(data => {
         data.obesity = +data.obesity;
@@ -151,9 +153,9 @@ function setToolTip(selectXAxis, circlesGroup, selectYAxis) {
         data.income = +data.income;
     });
 
-    var xLinearScale = xScale(data, selectXAxis);
+    var xLinearScale = xScale(data, selectedXAxis);
     
-    var yLinearScale = yScale(data, selectYAxis);
+    var yLinearScale = yScale(data, selectedYAxis);
     
     var bottomAxis = d3.axisBottom(xLinearScale);
     var leftAxis = d3.axisLeft(yLinearScale);
@@ -167,7 +169,7 @@ function setToolTip(selectXAxis, circlesGroup, selectYAxis) {
         .call(leftAxis);
         
     //Create circles for scatter plot
-    var circlesGroup = chartGroup.selectAll("circle")
+    var circlesGroup = chartGroup.selectedAll("circle")
         .data(data)
         .enter()
         .append("circle")
@@ -178,7 +180,7 @@ function setToolTip(selectXAxis, circlesGroup, selectYAxis) {
         .attr("opacity", "0.75")
         
     //Label circles on scatter plot
-    var circlesText = chartGroup.selectAll()
+    var circlesText = chartGroup.selectedAll()
         .data(data)
         .enter()
         .append("text")
@@ -262,4 +264,108 @@ var incomeLabel = xLabelGroup.append("text")
  .text("Household Income (Median)");
  
 //Update ToolTip
-var circlesGroup = setToolTip(selectXAxis, circlesGroup, selectYAxis);
+var circlesGroup = setToolTip(selectedXAxis, circlesGroup, selectedYAxis);
+
+})
+
+//x axis label event listener
+xLabelGroup.selectAll("text")
+.on("click", function(){
+    var value = d3.select(this).attr("value");
+    if(value !== selectedXAxis) {
+        selectedXAxis = value;
+        console.log(`Selected X-Axis: ${selectedXAxis}`);
+        xLinearScale = xScale(data, selectedXAxis);
+        xAxis = setXAxis(xLinearScale, xAxis);
+        circlesGroup = setCircles(circlesGroup, xLinearScale, selectedXAxis, yLinearScale, selectedYAxis);
+        circlesText = setCircleText(circlesText, xLinearScale, selectedXAxis, yLinearScale, selectedYAxis);
+        circlesGroup = setToolTip(selectedXAxis, circlesGroup, selectedYAxis);
+        //Set class for selected label
+        if (selectedXAxis === "poverty"){
+            povertyLabel
+                .classed("active", true)
+                .classed("inactive", false)
+            ageLabel
+                .classed("active", false)
+                .classed("inactive", true)
+            incomeLabel
+                .classed("active", false)
+                .classed("inactive", true)
+        }
+        else if (selectedXAxis === "age"){
+            povertyLabel
+                .classed("active", false)
+                .classed("inactive", true)
+            ageLabel
+                .classed("active", true)
+                .classed("inactive", false)
+            incomeLabel
+                .classed("active", false)
+                .classed("inactive", true)
+        }
+        else {
+            povertyLabel
+                .classed("active", false)
+                .classed("inactive", true)
+            ageLabel
+                .classed("active", false)
+                .classed("inactive", true)
+            incomeLabel
+                .classed("active", true)
+                .classed("inactive", false)
+        };
+    };
+});
+
+//y axis label event listener
+yLabelGroup.selectAll("text")
+.on("click", function(){
+var value = d3.select(this).attr("value");
+if(value !== selectedXAxis) {
+    selectedYAxis = value;
+    console.log(`Selected Y-Axis: ${selectedYAxis}`);
+    yLinearScale = yScale(data, selectedYAxis);
+    yAxis = setYAxis(yLinearScale, yAxis);
+    circlesGroup = setCircles(circlesGroup, xLinearScale, selectedXAxis, yLinearScale, selectedYAxis);
+    circlesText = setCircleText(circlesText, xLinearScale, selectedXAxis, yLinearScale, selectedYAxis);
+    circlesGroup = setToolTip(selectedXAxis, circlesGroup, selectedYAxis);
+    //Set class for selected label
+    if (selectedYAxis === "healthcare"){
+        healthcareLabel
+            .classed("active", true)
+            .classed("inactive", false)
+        smokeLabel
+            .classed("active", false)
+            .classed("inactive", true)
+        obeseLabel
+            .classed("active", false)
+            .classed("inactive", true)
+    }
+    else if (selectedYAxis === "smokes"){
+        healthcareLabel
+            .classed("active", false)
+            .classed("inactive", true)
+        smokeLabel
+            .classed("active", true)
+            .classed("inactive", false)
+        obeseLabel
+            .classed("active", false)
+            .classed("inactive", true)
+    }
+    else {
+        healthcareLabel
+            .classed("active", false)
+            .classed("inactive", true)
+        smokeLabel
+            .classed("active", false)
+            .classed("inactive", true)
+        obeseLabel
+            .classed("active", true)
+            .classed("inactive", false)
+    };
+};
+});
+}).catch(function(error){
+console.log(error);
+});
+
