@@ -138,11 +138,10 @@ function setToolTip(selectXAxis, circlesGroup, selectYAxis) {
     return circlesGroup;
 }
 
-//Load Data from CSV
+//Import Data from data.CSV
 
-d3.csv("./assets/data/data.csv").then(function(data){
-    console.log(data);
-    
+    d3.csv("./assets/data/data.csv").then(function(data) {
+
     data.forEach(data => {
         data.obesity = +data.obesity;
         data.smokes = +data.smokes;
@@ -172,8 +171,8 @@ d3.csv("./assets/data/data.csv").then(function(data){
         .data(data)
         .enter()
         .append("circle")
-        .attr("cx", d => xLinearScale(data.poverty))
-        .attr("cy", d => yLinearScale(data.healthcare))
+        .attr("cx", data => xLinearScale(data.poverty))
+        .attr("cy", data => yLinearScale(data.healthcare))
         .attr("r", "10")
         .attr("fill", "blue")
         .attr("opacity", "0.75")
@@ -184,8 +183,8 @@ d3.csv("./assets/data/data.csv").then(function(data){
         .enter()
         .append("text")
         .text(d => (d.abbr))
-        .attr("x", d => xLinearScale(data.poverty))
-        .attr("y", d => yLinearScale(data.healthcare))
+        .attr("x", data=> xLinearScale(data.poverty))
+        .attr("y", data => yLinearScale(data.healthcare))
         .attr("text-anchor", "middle")
         .attr("dominant-baseline", "middle")
         .attr("fill", "white")
@@ -195,8 +194,72 @@ d3.csv("./assets/data/data.csv").then(function(data){
         .attr("class", "d3-tip")
         .offset([80, -60])
         .html(function(d) {
-            return(`${d.state}<br>Poverty: ${d.poverty}%<br>Lacks Healthcare: ${d.healthcare}`);
+            return(`${data.state}<br>Poverty: ${data.poverty}%<br>Lacks Healthcare: ${d.healthcare}`);
         });
     
     //Create tooltip in chart
     chartGroup.call(toolTip);
+
+    circlesGroup
+    .on("mouseover", function(d) {toolTip.show(d, this);
+    })
+    .on("mouseout", d => {toolTip.hide(d, this);
+})
+
+ //Append and create y axis label group
+ var yLabelGroup = chartGroup.append("g")
+ .attr("transform", `translate(-35, ${height/2})`)
+ .attr("class", "axisText")
+     
+var healthcareLabel = yLabelGroup.append("text")   
+ .attr("x", 0)
+ .attr("y", 0)
+ .attr("value", "healthcare")
+ .attr("transform", "rotate(-90)")
+ .classed("active", true)
+ .text("Lack Healthcare (%)");
+ 
+var smokeLabel = yLabelGroup.append("text")   
+  .attr("x", 0)
+  .attr("y", -20)
+  .attr("value", "smokes")
+  .attr("transform", "rotate(-90)")
+  .classed("inactive", true)
+  .text("Smokes (%)");
+ 
+var obeseLabel = yLabelGroup.append("text")   
+ .attr("x", 0)
+ .attr("y", -40)
+ .attr("value", "obesity")
+ .attr("transform", "rotate(-90)")
+ .classed("inactive", true)
+ .text("Obese (%)");
+ 
+//Append and create x axis label group
+var xLabelGroup = chartGroup.append("g")
+ .attr("transform", `translate(${width/2}, ${height + margin.top + 20})`)
+ .attr("class", "axisText")
+
+var povertyLabel = xLabelGroup.append("text")
+ .attr("x", 0)
+ .attr("y", 0)
+ .attr("value", "poverty")
+ .classed("active", true)
+ .text("In Poverty (%)");
+ 
+var ageLabel = xLabelGroup.append("text")
+ .attr("x", 0)
+ .attr("y", 20)
+ .attr("value", "age")
+ .classed("inactive", true)
+ .text("Age (Median)");
+
+var incomeLabel = xLabelGroup.append("text")
+ .attr("x", 0)
+ .attr("y", 40)
+ .attr("value", "income")
+ .classed("inactive", true)
+ .text("Household Income (Median)");
+ 
+//Update ToolTip
+var circlesGroup = setToolTip(selectXAxis, circlesGroup, selectYAxis);
